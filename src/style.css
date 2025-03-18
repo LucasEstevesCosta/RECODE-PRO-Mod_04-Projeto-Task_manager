@@ -1,0 +1,69 @@
+:root {
+    --primary-yellow: #ffd700;
+    --dark-black: #1a1a1a;
+    --light-gray: #f4f4f4;
+    --hover-yellow: #ffed4a;
+}
+
+body {
+    background-color: var(--dark-black) !important;
+    font-family: 'Segoe UI', sans-serif;
+}
+
+.card {
+    background-color: var(--light-gray);
+    border: none;
+    border-radius: 15px;
+}
+
+.card-body {
+    padding: 2rem;
+}
+
+h1 {
+    color: var(--dark-black);
+    font-weight: 600;
+}
+
+.btn-primary {
+    background-color: var(--primary-yellow) !important;
+    border-color: var(--primary-yellow) !important;
+    color: var(--dark-black) !important;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+    background-color: var(--hover-yellow) !important;
+    transform: translateY(-2px);
+}
+
+.list-group-item {
+    border-left: 4px solid var(--primary-yellow);
+    margin-bottom: 0.5rem;
+    transition: all 0.3s ease;
+}
+
+.list-group-item:hover {
+    background-color: #f8f9fa;
+    transform: translateX(5px);
+}
+
+.list-group-item.completed {
+    text-decoration: line-through;
+    opacity: 0.7;
+    border-left-color: #28a745;
+}
+
+.btn-remove {
+    color: #dc3545;
+    background: none;
+    border: none;
+    padding: 0.25rem 0.5rem;
+    margin-left: 0.5rem;
+}
+
+.input-group .form-control:focus {
+    border-color: var(--primary-yellow);
+    box-shadow: 0 0 0 0.2rem rgba(255, 215, 0, 0.25);
+}

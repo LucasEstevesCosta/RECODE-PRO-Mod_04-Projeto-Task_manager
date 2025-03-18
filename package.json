@@ -1,0 +1,22 @@
+{
+  "name": "recode-pro-mod_04-projeto-task_manager",
+  "version": "1.0.0",
+  "description": "Lista de Exercícios: Manipulação do DOM com JavaScript\r Objetivo\r Criar uma Lista de Tarefas (To-Do List) interativa utilizando HTML, CSS e JavaScript. Os exercícios ajudarão os alunos a praticar a manipulação do DOM, eventos e interatividade.\r Exercício 1: Criando a Estrutura HTML",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest --env=jsdom"
+  },
+  "jest": {
+    "testEnvironment": "jsdom",
+    "verbose": true
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "devDependencies": {
+    "@testing-library/jest-dom": "^6.6.3",
+    "jest": "^29.7.0",
+    "jest-environment-jsdom": "^29.7.0"
+  }
+}
