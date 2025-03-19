@@ -6,6 +6,16 @@ This Task Manager is a learning exercise developed to practice DOM manipulation,
 ## Contributions
 Feel free to contribute to this project by submitting pull requests or opening issues. Any suggestions for improvements are welcome!
 
+## Installation and Usage
+You can try the live version at: [Task Manager App](https://recode-pro-mod-04-projeto-task-manager.vercel.app/)
+
+To run locally:
+```bash
+git clone https://github.com/yourusername/RECODE-PRO-Mod_04-Projeto-Task_manager.git
+cd RECODE-PRO-Mod_04-Projeto-Task_manager
+```
+Then open `src/index.html` in your browser.
+
 ## Project Description
 A simple task management application that allows users to create, complete, and remove tasks. Tasks persist between sessions using localStorage, and the application provides a real-time counter of pending tasks.
 
