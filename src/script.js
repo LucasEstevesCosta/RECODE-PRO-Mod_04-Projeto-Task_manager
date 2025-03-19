@@ -1,24 +1,65 @@
+// Event Listeners
+document.addEventListener('DOMContentLoaded', updateUI);
+
 /**
- * Saves a task to localStorage
- * @param {string} taskText - The text content of the task to be saved
+ * Handles the "Add" button click event. Gets text from input field, calls saveTask() to store it, and triggers updateUI() to refresh the display. Acts as the main entry point for adding new tasks.
+ */
+function handleAddTask() {
+    const taskInput = document.getElementById('taskInput');
+    const taskText = taskInput.value.trim();
+
+    if (saveTask(taskText)) {
+        taskInput.value = ''; // Clear input
+        updateUI();
+    }
+}
+
+/**
+ * Creates a new task object with a unique ID (using Date.now()), the provided text, completion status set to false, and a timestamp. It validates the input text and returns null if invalid. 
+ * @param {string} taskText - The text content of the task
+ * @returns {Object|null} The created task object or null if invalid
+ */
+function createTask(taskText) {
+    if (!taskText || typeof taskText !== 'string' || taskText.trim() === '') {
+        return null;
+    }
+
+    return {
+        id: Date.now(),
+        text: taskText.trim(),
+        completed: false,
+        createdAt: new Date().toISOString()
+    };
+}
+
+/**
+ * Handles the localStorage operations by taking an array of tasks and storing it as a JSON string. Uses localStorage.setItem() and JSON.stringify() to persist the data. Returns true if successful, false if there's an error. This function is focused solely on data persistence.
+ * @param {Array} tasks - Array of task objects to store
+ * @returns {boolean} - Success status of the operation
+ */
+function storeTasks(tasks) {
+    try {
+        localStorage.setItem('tasks', JSON.stringify(tasks));
+        return true;
+    } catch (error) {
+        console.error('Error storing tasks:', error);
+        return false;
+    }
+}
+
+/**
+ * Orchestrates the task creation and storage process. It calls createTask() to create a new task object, retrieves existing tasks from localStorage using JSON.parse(), adds the new task to the array, and then calls storeTasks() to save the updated array. Acts as a coordinator between task creation and storage operations.
+ * @param {string} taskText - The text content of the task
  * @returns {boolean} - Success status of the operation
  */
 function saveTask(taskText) {
-    if (!taskText || typeof taskText !== 'string' || taskText.trim() === '') {
-        return false;
-    }
+    const newTask = createTask(taskText);
+    if (!newTask) return false;
 
     try {
         const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
-        const newTask = {
-            id: Date.now(),
-            text: taskText.trim(),
-            completed: false,
-            createdAt: new Date().toISOString()
-        };
         tasks.push(newTask);
-        localStorage.setItem('tasks', JSON.stringify(tasks));
-        return true;
+        return storeTasks(tasks);
     } catch (error) {
         console.error('Error saving task:', error);
         return false;
@@ -26,7 +67,42 @@ function saveTask(taskText) {
 }
 
 /**
- * Creates an HTML element for a task
+ * Simple function that retrieves all tasks from localStorage and handles parsing. Returns an empty array if there's an error or no tasks. Doesn't call any other functions.
+ * @returns {Array} Array of task objects or empty array if none found
+ */
+function getTasks() {
+    try {
+        return JSON.parse(localStorage.getItem('tasks')) || [];
+    } catch (error) {
+        console.error('Error getting tasks:', error);
+        return [];
+    }
+}
+
+/**
+ * Updates specific properties of a task while preserving others. Calls getTasks() to retrieve current tasks and storeTasks() to save changes. Uses object spread operator for immutable updates.
+ * @param {number} taskId - The ID of the task to update
+ * @param {Object} updates - Object containing the properties to update
+ * @returns {boolean} Success status of the operation
+ */
+function updateTask(taskId, updates) {
+    try {
+        const tasks = getTasks();
+        const taskIndex = tasks.findIndex(task => task.id === taskId);
+        
+        if (taskIndex !== -1) {
+            tasks[taskIndex] = { ...tasks[taskIndex], ...updates };
+            return storeTasks(tasks);
+        }
+        return false;
+    } catch (error) {
+        console.error('Error updating task:', error);
+        return false;
+    }
+}
+
+/**
+ * Builds and returns an HTML list item element for a task. Includes checkbox for completion status, task text, and a remove button. Applies appropriate Bootstrap classes for styling. Sets up event listeners that call toggleTaskComplete() and removeTask().
  * @param {Object} task - The task object containing id, text, and completed status
  * @returns {HTMLElement} The created task element
  */
@@ -64,18 +140,32 @@ function createTaskElement(task) {
 }
 
 /**
- * Adds a task element to the DOM
- * @param {HTMLElement} taskElement - The task element to be added
+ * Toggles the completion status of a task in localStorage. Calls getTasks() to find the task, updateTask() to modify it, and updateUI() to refresh the display.
+ * @param {number} taskId - The ID of the task to toggle
  */
-function addTaskToDOM(taskElement) {
-    const taskList = document.getElementById('taskList');
-    if (taskList) {
-        taskList.appendChild(taskElement);
+function toggleTaskComplete(taskId) {
+    try {
+        const tasks = getTasks();
+        const task = tasks.find(t => t.id === taskId);
+        
+        if (task && updateTask(taskId, { completed: !task.completed })) {
+            updateUI();
+        }
+    } catch (error) {
+        console.error('Error toggling task completion:', error);
     }
 }
 
 /**
- * Loads all tasks from localStorage and displays them
+ * Central function that refreshes all dynamic UI elements. Called after any data changes. Calls both loadTasks() and updatePendingTasksCount() to ensure everything is in sync.
+ */
+function updateUI() {
+    loadTasks();
+    updatePendingTasksCount();
+}
+
+/**
+ * Retrieves all tasks from localStorage, sorts them by creation date, and displays them in the UI. Shows an "empty list" message if no tasks exist. Also triggers the counter update.  Calls createTaskElement(), addTaskToDOM(), and updatePendingTasksCount().
  */
 function loadTasks() {
     const taskList = document.getElementById('taskList');
@@ -103,56 +193,10 @@ function loadTasks() {
 }
 
 /**
- * Handler for adding new tasks
- */
-function handleAddTask() {
-    const taskInput = document.getElementById('taskInput');
-    const taskText = taskInput.value.trim();
-
-    if (saveTask(taskText)) {
-        taskInput.value = ''; // Clear input
-        updateUI();
-    }
-}
-
-// Event Listeners
-document.addEventListener('DOMContentLoaded', updateUI);
-
-// Making functions available for testing
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = { 
-        saveTask, 
-        createTaskElement, 
-        addTaskToDOM, 
-        loadTasks, 
-        handleAddTask 
-    };
-}
-
-/**
- * Removes a task from localStorage and DOM
- * @param {number} taskId - The ID of the task to remove
- * @returns {boolean} - Success status of the operation
- */
-function removeTask(taskId) {
-    try {
-        // Remove from localStorage
-        const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
-        const updatedTasks = tasks.filter(task => task.id !== taskId);
-        localStorage.setItem('tasks', JSON.stringify(updatedTasks));
-        updateUI();
-        return true;
-    } catch (error) {
-        console.error('Error removing task:', error);
-        return false;
-    }
-}
-
-/**
- * Updates the pending tasks counter in the DOM
+ * Counts incomplete tasks and updates the counter badge in the UI. Used to keep track of remaining tasks. Uses getTasks()to get all tasks.
  */
 function updatePendingTasksCount() {
-    const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+    const tasks = getTasks();
     const pendingTasks = tasks.filter(task => !task.completed).length;
     const counterElement = document.getElementById('pendingTasksCount');
     
@@ -161,29 +205,33 @@ function updatePendingTasksCount() {
     }
 }
 
+
 /**
- * Toggles the completion status of a task
- * @param {number} taskId - The ID of the task to toggle
+ * Simply adds a task element to the task list in the DOM. Acts as a wrapper for appendChild to keep DOM manipulation centralized.
+ * @param {HTMLElement} taskElement - The task element to be added
  */
-function toggleTaskComplete(taskId) {
-    try {
-        const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
-        const taskIndex = tasks.findIndex(task => task.id === taskId);
-        
-        if (taskIndex !== -1) {
-            tasks[taskIndex].completed = !tasks[taskIndex].completed;
-            localStorage.setItem('tasks', JSON.stringify(tasks));
-            updateUI();
-        }
-    } catch (error) {
-        console.error('Error toggling task completion:', error);
+function addTaskToDOM(taskElement) {
+    const taskList = document.getElementById('taskList');
+    if (taskList) {
+        taskList.appendChild(taskElement);
     }
 }
 
 /**
- * Updates all DOM elements that depend on tasks data
+ * Removes a task from by filtering out the task with the given ID. Calls updateUI() to refresh the display after removal. Returns true if successful.
+ * @param {number} taskId - The ID of the task to remove
+ * @returns {boolean} - Success status of the operation
  */
-function updateUI() {
-    loadTasks();
-    updatePendingTasksCount();
+function removeTask(taskId) {
+    try {
+        // Remove from localStorage
+        const tasks = getTasks();
+        const updatedTasks = tasks.filter(task => task.id !== taskId);
+        localStorage.setItem('tasks', JSON.stringify(updatedTasks));
+        updateUI();
+        return true;
+    } catch (error) {
+        console.error('Error removing task:', error);
+        return false;
+    }
 }
