@@ -48,4 +48,3 @@ Exercício 6: Melhorias e Personalização
 - Criar uma opção para editar uma tarefa existente.
 - Melhorar o design com animações e cores.
 Conclusão
-Com essa lista de exercícios, os alunos vão praticar a manipulação do DOM e criar um projeto funcional. Caso precise de ajustes ou novas sugestões, é só avisar! 😊

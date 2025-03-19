@@ -33,7 +33,7 @@ function createTask(taskText) {
 }
 
 /**
- * Handles the localStorage operations by taking an array of tasks and storing it as a JSON string. Uses localStorage.setItem() and JSON.stringify() to persist the data. Returns true if successful, false if there's an error. This function is focused solely on data persistence.
+ * STORAGE ABSTRACTION FUNCTION Tandles the localStorage operations by taking an array of tasks and storing it as a JSON string. Uses localStorage.setItem() and JSON.stringify() to persist the data. Returns true if successful, false if there's an error. This function is focused solely on data persistence.
  * @param {Array} tasks - Array of task objects to store
  * @returns {boolean} - Success status of the operation
  */
@@ -48,26 +48,7 @@ function storeTasks(tasks) {
 }
 
 /**
- * Orchestrates the task creation and storage process. It calls createTask() to create a new task object, retrieves existing tasks from localStorage using JSON.parse(), adds the new task to the array, and then calls storeTasks() to save the updated array. Acts as a coordinator between task creation and storage operations.
- * @param {string} taskText - The text content of the task
- * @returns {boolean} - Success status of the operation
- */
-function saveTask(taskText) {
-    const newTask = createTask(taskText);
-    if (!newTask) return false;
-
-    try {
-        const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
-        tasks.push(newTask);
-        return storeTasks(tasks);
-    } catch (error) {
-        console.error('Error saving task:', error);
-        return false;
-    }
-}
-
-/**
- * Simple function that retrieves all tasks from localStorage and handles parsing. Returns an empty array if there's an error or no tasks. Doesn't call any other functions.
+ * STORAGE ABSTRACTION FUNCTION that retrieves all tasks from localStorage and handles parsing. Returns an empty array if there's an error or no tasks. Doesn't call any other functions.
  * @returns {Array} Array of task objects or empty array if none found
  */
 function getTasks() {
@@ -76,6 +57,25 @@ function getTasks() {
     } catch (error) {
         console.error('Error getting tasks:', error);
         return [];
+    }
+}
+
+/**
+ * Orchestrates the task creation and storage process. It calls createTask() to create a new task object, calls getTasks() to retrieves existing tasks, adds the new task to the array, and then calls storeTasks() to save the updated array. Acts as a coordinator between task creation and storage operations.
+ * @param {string} taskText - The text content of the task
+ * @returns {boolean} - Success status of the operation
+ */
+function saveTask(taskText) {
+    const newTask = createTask(taskText);
+    if (!newTask) return false;
+
+    try {
+        const tasks = getTasks();
+        tasks.push(newTask);
+        return storeTasks(tasks);
+    } catch (error) {
+        console.error('Error saving task:', error);
+        return false;
     }
 }
 
@@ -140,7 +140,7 @@ function createTaskElement(task) {
 }
 
 /**
- * Toggles the completion status of a task in localStorage. Calls getTasks() to find the task, updateTask() to modify it, and updateUI() to refresh the display.
+ * Toggles the completion status of a task. Calls getTasks() to find the task, updateTask() to modify it, and updateUI() to refresh the display.
  * @param {number} taskId - The ID of the task to toggle
  */
 function toggleTaskComplete(taskId) {
@@ -165,14 +165,14 @@ function updateUI() {
 }
 
 /**
- * Retrieves all tasks from localStorage, sorts them by creation date, and displays them in the UI. Shows an "empty list" message if no tasks exist. Also triggers the counter update.  Calls createTaskElement(), addTaskToDOM(), and updatePendingTasksCount().
+ * Calls getTasks() to retrieve all existing tasks, sorts them by creation date, and displays them in the UI. Shows an "empty list" message if no tasks exist. Also triggers the counter update.  Calls createTaskElement(), addTaskToDOM(), and updatePendingTasksCount().
  */
 function loadTasks() {
     const taskList = document.getElementById('taskList');
     if (!taskList) return;
 
     taskList.innerHTML = ''; // Clear existing tasks
-    const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+    const tasks = getTasks();
 
     if (tasks.length === 0) {
         const emptyMessage = document.createElement('li');
@@ -218,13 +218,12 @@ function addTaskToDOM(taskElement) {
 }
 
 /**
- * Removes a task from by filtering out the task with the given ID. Calls updateUI() to refresh the display after removal. Returns true if successful.
+ * Removes a task from by filtering out the task with the given ID. Calls getTasks() to get all tasks, modify the task list, calls storeTasks() to store the modified list then calls updateUI() to refresh the display after removal. Returns true if successful.
  * @param {number} taskId - The ID of the task to remove
  * @returns {boolean} - Success status of the operation
  */
 function removeTask(taskId) {
     try {
-        // Remove from localStorage
         const tasks = getTasks();
         const updatedTasks = tasks.filter(task => task.id !== taskId);
         if (storeTasks(updatedTasks)) {
