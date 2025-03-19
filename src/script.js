@@ -227,8 +227,10 @@ function removeTask(taskId) {
         // Remove from localStorage
         const tasks = getTasks();
         const updatedTasks = tasks.filter(task => task.id !== taskId);
-        localStorage.setItem('tasks', JSON.stringify(updatedTasks));
-        updateUI();
+        if (storeTasks(updatedTasks)) {
+            updateUI();
+            return true;
+        }
         return true;
     } catch (error) {
         console.error('Error removing task:', error);
